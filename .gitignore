@@ -1,0 +1,5 @@
+.serverless
+bin
+.DS_Store
+vendor/*
+!vendor/vendor.json
