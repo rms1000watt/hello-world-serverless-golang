@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -13,15 +11,28 @@ func TestMain(m *testing.M) {
 }
 
 func TestHandler(t *testing.T) {
-	out := Response{
-		Message: "Okay so your other function also executed successfully!",
+	tests := []struct {
+		name    string
+		want    Response
+		wantErr bool
+	}{
+		{
+			name: "success",
+			want: Response{
+				Message: "Okay so your other function also executed successfully!",
+			},
+		},
 	}
-
-	res, err := Handler()
-	if err != nil {
-		fmt.Println("Error: Handler call failed: ", err)
-		t.Fatal(err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Handler()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Handler() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Handler() = %v, want %v", got, tt.want)
+			}
+		})
 	}
-
-	assert.Equal(t, res.Message, out.Message, "They should be equal")
 }

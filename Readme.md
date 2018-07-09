@@ -19,7 +19,7 @@ aws s3 mb s3://org-name-us-west-2-serverless-deploys
 # Vendor, test
 go get -u github.com/kardianos/govendor
 govendor sync
-go test ./...
+go test ./... -coverprofile /dev/null
 
 # Install, login, build, deploy
 npm install serverless -g

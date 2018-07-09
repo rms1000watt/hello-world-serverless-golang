@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -14,19 +13,38 @@ func TestMain(m *testing.M) {
 }
 
 func TestHandler(t *testing.T) {
-	in := events.APIGatewayProxyRequest{
-		Body: "hello world",
+	type args struct {
+		request events.APIGatewayProxyRequest
 	}
-
-	out := events.APIGatewayProxyResponse{
-		Body: "Your POST body: " + in.Body,
+	tests := []struct {
+		name    string
+		args    args
+		want    events.APIGatewayProxyResponse
+		wantErr bool
+	}{
+		{
+			name: "success",
+			args: args{
+				request: events.APIGatewayProxyRequest{
+					Body: "hello world",
+				},
+			},
+			want: events.APIGatewayProxyResponse{
+				StatusCode: 200,
+				Body:       "Your POST body: hello world",
+			},
+		},
 	}
-
-	res, err := Handler(in)
-	if err != nil {
-		fmt.Println("Error: Handler call failed: ", err)
-		t.Fatal(err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Handler(tt.args.request)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Handler() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Handler() = %v, want %v", got, tt.want)
+			}
+		})
 	}
-
-	assert.Equal(t, res.Body, out.Body, "They should be equal")
 }
